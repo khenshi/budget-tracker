@@ -37,7 +37,7 @@ Copy `.env.example` to `.env` and set:
 
 - **DATABASE_URL** – PostgreSQL connection string (e.g. from [Neon](https://neon.tech) or [Supabase](https://supabase.com))
 - **AUTH_SECRET** – Generate with: `openssl rand -base64 32`
-- **NEXTAUTH_URL** – `http://localhost:3000` (dev) or your production URL
+- **AUTH_URL** – `http://localhost:3000` (dev) or your production URL
 
 ### 3. Database
 
@@ -65,25 +65,23 @@ Push the repo to GitHub.
 ### 2. Vercel
 
 1. [Vercel](https://vercel.com) → **Add New** → **Project** → Import the GitHub repo.
-2. **Environment variables** (same as `.env`):
-   - `DATABASE_URL`
-   - `AUTH_SECRET`
-   - `NEXTAUTH_URL` = `https://your-app.vercel.app`
-3. Deploy. Vercel runs `prisma generate` and `next build` automatically.
+2. **Environment variables** (see `.env.example`):
+   - `DATABASE_URL` – PostgreSQL connection string (use **pooled** URL for Neon, Supabase, Vercel Postgres)
+   - `AUTH_SECRET` – Generate with: `openssl rand -base64 32`
+   - `AUTH_URL` – Your production URL, e.g. `https://your-app.vercel.app`
+3. Deploy. The build runs `prisma generate && next build` automatically.
 
-### 3. Database migrations
+### 3. Database setup
 
-If you use migrations instead of `db push`:
-
-- In **Project Settings** → **Build & Development** → set **Build Command** to:  
+- **First deploy**: Run `npx prisma db push` locally with `DATABASE_URL` pointing to your production DB, or use Vercel Postgres / Neon / Supabase to create the schema.
+- **Migrations**: If using `prisma migrate`, set **Build Command** to:  
   `prisma generate && prisma migrate deploy && next build`
-- Or run migrations from your machine or CI against the production `DATABASE_URL` after each deploy.
 
 ### 4. Post-deploy
 
-- Confirm `NEXTAUTH_URL` matches the deployed URL.
+- Confirm `AUTH_URL` matches your deployed URL exactly.
 - For a fresh DB, run the seed once:  
-  `npx prisma db seed` (with production `DATABASE_URL` in `.env`).
+  `DATABASE_URL="your-prod-url" npx prisma db seed`
 
 ## Project structure
 

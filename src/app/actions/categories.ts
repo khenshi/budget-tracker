@@ -5,6 +5,22 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { categorySchema } from "@/lib/validations";
 
+export async function getCategories() {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const categories = await prisma.category.findMany({
+    where: {
+      OR: [
+        { userId: session.user.id },
+        { isDefault: true },
+      ],
+    },
+    orderBy: { name: "asc" },
+  });
+  return categories;
+}
+
 export async function createCategory(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/card";
 import { loginSchema } from "@/lib/validations";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
@@ -104,5 +104,23 @@ export default function LoginPage() {
         </form>
       </Card>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-6">
+        <div className="w-full max-w-md rounded-xl border bg-card p-6 animate-pulse">
+          <div className="h-8 bg-muted rounded w-1/3 mb-4" />
+          <div className="h-4 bg-muted rounded w-2/3 mb-6" />
+          <div className="h-10 bg-muted rounded mb-4" />
+          <div className="h-10 bg-muted rounded mb-6" />
+          <div className="h-12 bg-muted rounded" />
+        </div>
+      </main>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

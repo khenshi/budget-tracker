@@ -1,27 +1,38 @@
 "use client";
 
+import React from "react";
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Transaction } from "@prisma/client";
 import type { Category } from "@prisma/client";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const asComponent = (x: unknown): React.ComponentType<any> => x as React.ComponentType<any>;
 const PieChart = dynamic(
-  () => import("recharts").then((m) => m.PieChart),
+  () => import("recharts").then((m) => asComponent(m.PieChart)),
   { ssr: false }
 );
-const Pie = dynamic(() => import("recharts").then((m) => m.Pie), { ssr: false });
-const Cell = dynamic(() => import("recharts").then((m) => m.Cell), { ssr: false });
+const Pie = dynamic(
+  () => import("recharts").then((m) => asComponent(m.Pie)),
+  { ssr: false }
+);
+const Cell = dynamic(
+  () => import("recharts").then((m) => asComponent(m.Cell)),
+  { ssr: false }
+);
 const ResponsiveContainer = dynamic(
-  () => import("recharts").then((m) => m.ResponsiveContainer),
+  () => import("recharts").then((m) => asComponent(m.ResponsiveContainer)),
   { ssr: false }
 );
-const Legend = dynamic(() => import("recharts").then((m) => m.Legend), {
-  ssr: false,
-});
-const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), {
-  ssr: false,
-});
+const Legend = dynamic(
+  () => import("recharts").then((m) => asComponent(m.Legend)),
+  { ssr: false }
+);
+const Tooltip = dynamic(
+  () => import("recharts").then((m) => asComponent(m.Tooltip)),
+  { ssr: false }
+);
 
 type TxWithCategory = Transaction & { category: Category };
 
@@ -78,7 +89,7 @@ export function DonutChartSection({
                 innerRadius={60}
                 outerRadius={80}
                 paddingAngle={2}
-                label={({ name, percent }) =>
+                label={({ name, percent }: { name: string; percent: number }) =>
                   percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ""
                 }
               >

@@ -1,32 +1,57 @@
 "use client";
 
+import React from "react";
 import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 
+// Dynamic import for Recharts (avoids SSR, reduces bundle). Type assertion for Next.js dynamic compatibility.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const asComponent = (x: unknown): React.ComponentType<any> => x as React.ComponentType<any>;
 const BarChart = dynamic(
-  () => import("recharts").then((m) => m.BarChart),
+  () => import("recharts").then((mod) => asComponent(mod.BarChart)),
   { ssr: false }
 );
-const Bar = dynamic(() => import("recharts").then((m) => m.Bar), { ssr: false });
-const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), { ssr: false });
-const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), { ssr: false });
+const Bar = dynamic(
+  () => import("recharts").then((mod) => asComponent(mod.Bar)),
+  { ssr: false }
+);
+const XAxis = dynamic(
+  () => import("recharts").then((mod) => asComponent(mod.XAxis)),
+  { ssr: false }
+);
+const YAxis = dynamic(
+  () => import("recharts").then((mod) => asComponent(mod.YAxis)),
+  { ssr: false }
+);
 const CartesianGrid = dynamic(
-  () => import("recharts").then((m) => m.CartesianGrid),
+  () => import("recharts").then((mod) => asComponent(mod.CartesianGrid)),
   { ssr: false }
 );
 const ResponsiveContainer = dynamic(
-  () => import("recharts").then((m) => m.ResponsiveContainer),
+  () => import("recharts").then((mod) => asComponent(mod.ResponsiveContainer)),
   { ssr: false }
 );
-const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
-const Legend = dynamic(() => import("recharts").then((m) => m.Legend), { ssr: false });
+const Tooltip = dynamic(
+  () => import("recharts").then((mod) => asComponent(mod.Tooltip)),
+  { ssr: false }
+);
+const Legend = dynamic(
+  () => import("recharts").then((mod) => asComponent(mod.Legend)),
+  { ssr: false }
+);
 const PieChart = dynamic(
-  () => import("recharts").then((m) => m.PieChart),
+  () => import("recharts").then((mod) => asComponent(mod.PieChart)),
   { ssr: false }
 );
-const Pie = dynamic(() => import("recharts").then((m) => m.Pie), { ssr: false });
-const Cell = dynamic(() => import("recharts").then((m) => m.Cell), { ssr: false });
+const Pie = dynamic(
+  () => import("recharts").then((mod) => asComponent(mod.Pie)),
+  { ssr: false }
+);
+const Cell = dynamic(
+  () => import("recharts").then((mod) => asComponent(mod.Cell)),
+  { ssr: false }
+);
 
 export function AnalyticsCharts({
   thisIncome,
@@ -62,7 +87,7 @@ export function AnalyticsCharts({
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="month" className="text-xs" />
                 <YAxis
-                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                  tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
                   className="text-xs"
                 />
                 <Tooltip
@@ -95,7 +120,7 @@ export function AnalyticsCharts({
                     cy="50%"
                     outerRadius={100}
                     paddingAngle={2}
-                    label={({ name, percent }) =>
+                    label={({ name, percent }: { name: string; percent: number }) =>
                       percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ""
                     }
                   >
