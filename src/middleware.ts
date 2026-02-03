@@ -1,17 +1,25 @@
-import { auth } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
 
 const publicPaths = ["/", "/login", "/register"];
 
-export default auth((req) => {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isPublic = publicPaths.some((p) => p === pathname);
-  if (isPublic) return;
-  if (!req.auth) {
+  
+  if (isPublic) return NextResponse.next();
+  
+  // For protected routes, check for auth cookie
+  const authCookie = req.cookies.get("__Secure-authjs.session-token")?.value || 
+                      req.cookies.get("authjs.session-token")?.value;
+  
+  if (!authCookie) {
     const login = new URL("/login", req.nextUrl.origin);
     login.searchParams.set("callbackUrl", pathname);
-    return Response.redirect(login);
+    return NextResponse.redirect(login);
   }
-});
+  
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
