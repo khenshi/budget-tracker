@@ -1,24 +1,34 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { unstable_cache } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { categorySchema } from "@/lib/validations";
 
+// Cache categories for 1 hour (3600 seconds)
+const getCategoriesCached = unstable_cache(
+  async (userId: string) => {
+    const categories = await prisma.category.findMany({
+      where: {
+        OR: [
+          { userId },
+          { isDefault: true },
+        ],
+      },
+      orderBy: { name: "asc" },
+    });
+    return categories;
+  },
+  ["user-categories"],
+  { revalidate: 3600, tags: ["categories"] }
+);
+
 export async function getCategories() {
   const session = await auth();
   if (!session?.user?.id) return [];
-
-  const categories = await prisma.category.findMany({
-    where: {
-      OR: [
-        { userId: session.user.id },
-        { isDefault: true },
-      ],
-    },
-    orderBy: { name: "asc" },
-  });
-  return categories;
+  
+  return getCategoriesCached(session.user.id);
 }
 
 export async function createCategory(formData: FormData) {
@@ -41,9 +51,11 @@ export async function createCategory(formData: FormData) {
       isDefault: false,
     },
   });
-  revalidatePath("/categories");
-  revalidatePath("/dashboard");
-  revalidatePath("/transactions");
-  revalidatePath("/budgets");
+  
+  // Revalidate cache tag instead of individual paths
+  revalidatePath("/categories", "layout");
+  revalidatePath("/dashboard", "layout");
+  revalidatePath("/transactions", "layout");
+  revalidatePath("/budgets", "layout");
   return { success: true };
 }
